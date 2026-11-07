@@ -80,7 +80,7 @@ let settings: Settings = {
   screen: { truckStrip: 'auto' },
   look: { wallpaper: null, iconSet: null, iconStyle: 'auto' },
   graphics: { gpu: null },
-  map: { buildings: true, roads: true, fast: false },
+  map: { buildings: true, roads: true, fast: false, selectedProfile: null, autoBuildAll: false },
   language: null,
 }
 

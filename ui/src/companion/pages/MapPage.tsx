@@ -189,6 +189,21 @@ export function MapPage(props: PageProps) {
               />
             }
           />
+          <Row
+            title={code === 'ru_ru' ? 'Отрисовывать все профили' : 'Render all profiles'}
+            detail={
+              code === 'ru_ru'
+                ? 'Автоматически строить карты для всех профилей в фоне (выключите, чтобы большие сборки модов не грузили ПК)'
+                : 'Automatically build maps for all profiles in background'
+            }
+            accessory={
+              <Switch
+                on={settings.map.autoBuildAll ?? false}
+                label={code === 'ru_ru' ? 'Отрисовывать все профили' : 'Render all profiles'}
+                change={(autoBuildAll) => update({ ...settings, map: { ...settings.map, autoBuildAll } })}
+              />
+            }
+          />
         </Group>
       )}
       {(setup.games.length ? setup.games : [null]).map((game, at) => {
@@ -204,9 +219,36 @@ export function MapPage(props: PageProps) {
             {check ? (
               check.profiles.length ? (
                 [
-                  ...check.profiles.map((profile) => {
+                  ...check.profiles.map((profile, pIdx) => {
                     const map = maps.find((each) => each.dir === profile.dir)
-                    return <ProfileRow key={profile.dir} profile={profile} map={map?.status} leftOut={map?.leftOut} />
+                    const isSelected = settings?.map.selectedProfile
+                      ? settings.map.selectedProfile === profile.name || settings.map.selectedProfile === profile.dir
+                      : pIdx === 0
+                    return (
+                      <ProfileRow
+                        key={profile.dir}
+                        profile={profile}
+                        map={map?.status}
+                        leftOut={map?.leftOut}
+                        selected={isSelected}
+                        onSelect={() => {
+                          if (settings) {
+                            update({ ...settings, map: { ...settings.map, selectedProfile: profile.name } })
+                          }
+                        }}
+                        onPrepare={
+                          map?.folder
+                            ? () => {
+                                if (settings) {
+                                  update({ ...settings, map: { ...settings.map, selectedProfile: profile.name } })
+                                }
+                                ask([map.folder])
+                              }
+                            : undefined
+                        }
+                        busy={asked}
+                      />
+                    )
                   }),
                   // TruckersMP's, with TruckersMP installed: the game's map with TruckersMP's own over it, which
                   // every profile plays there (no profile's mods load on TruckersMP); and its ProMods servers', once
@@ -226,6 +268,14 @@ export function MapPage(props: PageProps) {
                         }}
                         map={each.status}
                         leftOut={each.leftOut}
+                        onPrepare={
+                          each.folder
+                            ? () => {
+                                ask([each.folder])
+                              }
+                            : undefined
+                        }
+                        busy={asked}
                       />
                     )),
                 ]

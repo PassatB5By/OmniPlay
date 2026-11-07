@@ -284,18 +284,24 @@ export function ProfileRow({
   profile,
   map: state,
   leftOut = [],
+  selected,
+  onSelect,
+  onPrepare,
+  busy,
 }: {
   profile: ProfileCheck
   map?: MapStatus
   leftOut?: string[]
+  selected?: boolean
+  onSelect?: () => void
+  onPrepare?: () => void
+  busy?: boolean
 }) {
   const { words, code } = useContext(WordsContext)
+  const isRu = code === 'ru_ru'
   const w = words.check
   if (profile.hvtMap || state?.state === 'notAllowed') {
     return <Row title={profile.name} detail={hvtMapMessage(code)} accessory={<Cross />} />
-  }
-  if (state?.state === 'failed') {
-    return <Row title={profile.name} detail={state.error} accessory={<Cross />} />
   }
   const withMods = mapOf(words, profile)
   // Once its map is made, the mods it was made without, by name; before, how many the check couldn't read.
@@ -305,12 +311,70 @@ export function ProfileRow({
       ? ` (${count(words, w.unreadable, profile.unreadable)})`
       : ''
   const building = state?.state === 'building' ? ` · ${percent(words, state.done)}` : ''
-  const waiting = state !== undefined && state.state !== 'ready'
+  const isBuilding = state?.state === 'building'
+  const isReady = state?.state === 'ready'
+  const isQueued = state?.state === 'queued'
+
+  const accessory = (
+    <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+      {selected && (
+        <span
+          style={{
+            fontSize: 11,
+            fontWeight: 700,
+            color: '#22c55e',
+            background: 'rgba(34, 197, 94, 0.15)',
+            padding: '2px 6px',
+            borderRadius: 4,
+            textTransform: 'uppercase',
+            letterSpacing: '0.04em',
+          }}
+        >
+          {isRu ? 'В кабине' : 'Active'}
+        </span>
+      )}
+      {isBuilding ? (
+        <Checking />
+      ) : isQueued ? (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          <Checking />
+          <span style={{ fontSize: 12, opacity: 0.7 }}>{isRu ? 'В очереди' : 'Queued'}</span>
+        </div>
+      ) : isReady ? (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <Tick done />
+          {onPrepare && (
+            <Button
+              glass
+              small
+              onClick={onPrepare}
+              busy={busy}
+            >
+              {isRu ? 'Перерисовать' : 'Redraw'}
+            </Button>
+          )}
+        </div>
+      ) : (
+        onPrepare && (
+          <Button
+            glass
+            small
+            onClick={onPrepare}
+            busy={busy}
+          >
+            {isRu ? 'Отрисовать' : 'Render'}
+          </Button>
+        )
+      )}
+    </div>
+  )
+
   return (
     <Row
       title={profile.name}
-      detail={`${withMods}${unreadable}${building}`}
-      accessory={waiting ? <Checking /> : <Tick done />}
+      detail={state?.state === 'failed' ? `${state.error}` : `${withMods}${unreadable}${building}`}
+      onClick={onSelect}
+      accessory={accessory}
     />
   )
 }

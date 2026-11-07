@@ -36,6 +36,8 @@ export interface Settings {
     buildings: boolean
     roads: boolean
     fast: boolean
+    selectedProfile?: string | null
+    autoBuildAll?: boolean
   }
   /** The language WestPlay speaks in the cab and here: one of the game's (`de_de`), or `null`: the game's. */
   language: string | null

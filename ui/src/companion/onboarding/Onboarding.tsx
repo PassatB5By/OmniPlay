@@ -8,6 +8,7 @@ import {
   type GameInfo,
   type InstallReport,
   installIntoGame,
+  prepareMapsAgain,
   GAME_KINDS,
   GAME_NAMES,
   type SetupState,
@@ -37,6 +38,7 @@ import {
   Group,
   KeyChooser,
   MapProgress,
+  mapOf,
   Note,
   Panel,
   ProfileRow,
@@ -299,7 +301,16 @@ export function Onboarding({
                 back={back}
               />
             )}
-            {step === 'map' && <MapStep status={status} next={next} back={back} />}
+            {step === 'map' && (
+              <MapStep
+                status={status}
+                games={games}
+                checks={checks}
+                settings={settings}
+                next={next}
+                back={back}
+              />
+            )}
             {step === 'controls' && <Controls settings={settings} next={next} back={back} />}
             {step === 'accounts' && <Accounts status={status} next={next} back={back} />}
             {step === 'spotify' && <ServiceSignIn service="spotify" status={status} next={next} back={back} />}
@@ -773,7 +784,21 @@ function Install({
   )
 }
 
-function MapStep({ status, next, back }: { status: HostStatus | null; next(): void; back?: () => void }) {
+function MapStep({
+  status,
+  games,
+  checks,
+  settings,
+  next,
+  back,
+}: {
+  status: HostStatus | null
+  games?: GameInfo[]
+  checks?: Record<string, GameCheck>
+  settings?: SettingsState
+  next(): void
+  back?: () => void
+}) {
   const map = status?.map ?? { state: 'unknown' as const }
   const building = map.state === 'building' ? map : null
   const shown = useGlidingProgress(building?.done ?? null, building?.stage ?? null)
@@ -782,7 +807,46 @@ function MapStep({ status, next, back }: { status: HostStatus | null; next(): vo
   if (building && !watched) setWatched(true)
   const settled = map.state === 'ready' || map.state === 'notAllowed' || map.state === 'failed'
   const { words, code } = useContext(WordsContext)
+  const isRu = code === 'ru_ru'
   const w = words.map
+
+  const currentSettings = settings?.settings
+  const selectedProfile = currentSettings?.map.selectedProfile
+
+  // Collect profiles from checks and status.profileMaps
+  const profiles: { name: string; dir: string; folder?: string; modCount: number; mapSummary: string }[] = []
+  for (const game of games ?? []) {
+    const check = checks ? checks[game.dir] : undefined
+    for (const p of check?.profiles ?? []) {
+      const pm = status?.profileMaps.find((m) => m.dir === p.dir)
+      profiles.push({
+        name: p.name,
+        dir: p.dir,
+        folder: pm?.folder,
+        modCount: p.mapMods.length,
+        mapSummary: mapOf(words, p),
+      })
+    }
+  }
+
+  const activeProfile =
+    profiles.find((p) => p.name === selectedProfile || p.dir === selectedProfile) ?? profiles[0]
+
+  const selectAndPrepare = (p: (typeof profiles)[0]) => {
+    if (settings && currentSettings) {
+      settings.update({
+        ...currentSettings,
+        map: {
+          ...currentSettings.map,
+          selectedProfile: p.name,
+        },
+      })
+    }
+    if (p.folder) {
+      prepareMapsAgain([p.folder])
+    }
+  }
+
   // The HVT message, its two sentences as the banner's title and line.
   const [hvtTitle, hvtText] = [
     ...new Intl.Segmenter(words.locale, { granularity: 'sentence' }).segment(hvtMapMessage(code)),
@@ -830,13 +894,60 @@ function MapStep({ status, next, back }: { status: HostStatus | null; next(): vo
       sub={w.sub}
       back={back}
       action={
-        <Button onClick={next} disabled={!settled}>
-          {words.continue}
-        </Button>
+        <div style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
+          <Button onClick={next} disabled={!settled}>
+            {words.continue}
+          </Button>
+          {!settled && (
+            <Button glass small onClick={next}>
+              {isRu ? 'Пропустить' : 'Skip'}
+            </Button>
+          )}
+        </div>
       }
     >
       {(building || (watched && map.state === 'ready')) && (
         <MapProgress shown={shown} stage={building?.stage ?? null} finished={map.state === 'ready'} />
+      )}
+      {profiles.length > 1 && (
+        <Group title={isRu ? 'Выберите профиль для отрисовки' : 'Select profile to render'} place={3}>
+          {profiles.map((p) => {
+            const isSelected = activeProfile?.dir === p.dir || activeProfile?.name === p.name
+            return (
+              <Row
+                key={p.dir}
+                title={p.name}
+                detail={`${p.mapSummary}${p.modCount > 0 ? (isRu ? ` · ${p.modCount} модов карт` : ` · ${p.modCount} map mods`) : ''}`}
+                accessory={
+                  isSelected ? (
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 700,
+                        color: '#22c55e',
+                        padding: '2px 8px',
+                        borderRadius: 4,
+                        background: 'rgba(34,197,94,0.15)',
+                        textTransform: 'uppercase',
+                      }}
+                    >
+                      {isRu ? 'Выбран' : 'Selected'}
+                    </span>
+                  ) : (
+                    <Button
+                      glass
+                      small
+                      onClick={() => selectAndPrepare(p)}
+                    >
+                      {isRu ? 'Выбрать' : 'Select'}
+                    </Button>
+                  )
+                }
+                onClick={() => selectAndPrepare(p)}
+              />
+            )
+          })}
+        </Group>
       )}
       {map.state === 'failed' && <Note tone="bad">{map.error}</Note>}
       {map.state === 'waitingForGame' && (

@@ -68,7 +68,7 @@ impl<'de> Deserialize<'de> for LanguageCode {
 
 /// The cab's map (the companion's Map page): whether its buildings rise from it, and its bridges and ramps; and
 /// how the maps are prepared.
-#[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase", default)]
 pub struct MapSettings {
     pub buildings: bool,
@@ -77,11 +77,15 @@ pub struct MapSettings {
     /// four fifths of the PC's memory (`westplay_mapdata::threads::FULL_SHARE`), for PCs with plenty of both
     /// (owner 2026-11-06). Off: half the processor, the memory kept low.
     pub fast: bool,
+    /// The profile specifically chosen by the user to render and use for the cab map.
+    pub selected_profile: Option<String>,
+    /// Whether to auto-build maps for all profiles (false by default so 300-mod combos don't freeze the PC).
+    pub auto_build_all: bool,
 }
 
 impl Default for MapSettings {
     fn default() -> Self {
-        Self { buildings: true, roads: true, fast: false }
+        Self { buildings: true, roads: true, fast: false, selected_profile: None, auto_build_all: false }
     }
 }
 
@@ -501,7 +505,7 @@ mod tests {
                 equalizer: crate::speakers::Equalizer { bass: -3, mid: 1, treble: 2 },
                 custom: true,
             },
-            map: MapSettings { buildings: false, roads: false, fast: true },
+            map: MapSettings { buildings: false, roads: false, fast: true, selected_profile: None, auto_build_all: false },
             language: LanguageCode::new("pt_br"),
         };
         let json = to_json(&settings);

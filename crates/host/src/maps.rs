@@ -390,6 +390,17 @@ fn watch(
             let status = MapStatus::Failed { error };
             (MapUpdate { folder, built, status, profiles: Vec::new() }, false)
         } else {
+            let map_settings = settings.get().map;
+            if let Some(selected) = &map_settings.selected_profile {
+                if let Some(pos) = wants.iter().position(|w| {
+                    &w.profile.name == selected
+                        || w.dirs.iter().any(|d| d.to_string_lossy() == *selected || d.file_name().is_some_and(|n| n == selected.as_str()))
+                        || w.folder.file_name().is_some_and(|n| n == selected.as_str())
+                }) {
+                    let chosen = wants.remove(pos);
+                    wants.insert(0, chosen);
+                }
+            }
             let (game, profile) = (&wants[0].game, &wants[0].profile);
             let mut shared = played.lock().unwrap_or_else(|e| e.into_inner());
             if shared.as_ref().is_none_or(|(known_game, known)| known_game != game || known != profile) {
@@ -401,8 +412,7 @@ fn watch(
                     wants.iter().filter(|want| want.allowed && asked.has(&want.folder)).map(|want| want.folder.clone()),
                 );
             }
-            let fast = settings.get().map.fast;
-            let (mut update, more) = carry_out(&wants, maps, fast, builder, &mut failed, &mut again, sender, &mut sent);
+            let (mut update, more) = carry_out(&wants, maps, &map_settings, builder, &mut failed, &mut again, sender, &mut sent);
             // A game running that WestPlay isn't set up in (ATS beside an ETS2 set up before it, its plugin put
             // there by hand): no map in its cab, never the other game's.
             if Kind::ALL.iter().any(|kind| kind.running() && !games.iter().any(|(game, _)| game.kind == *kind)) {
@@ -724,7 +734,13 @@ fn is_map_folder(folder: &Path) -> bool {
 
 /// A map's state without building it: not allowed, failed (and nothing it's built from changed since),
 /// built, or to build (the player asked for it again, `again`).
-fn state_of(want: &Want, failed: &Failures, again: &HashSet<PathBuf>) -> MapStatus {
+fn state_of(
+    want: &Want,
+    is_active: bool,
+    auto_build_all: bool,
+    failed: &Failures,
+    again: &HashSet<PathBuf>,
+) -> MapStatus {
     if !want.allowed {
         return MapStatus::NotAllowed;
     }
@@ -736,7 +752,14 @@ fn state_of(want: &Want, failed: &Failures, again: &HashSet<PathBuf>) -> MapStat
     {
         return MapStatus::Failed { error: error.clone() };
     }
-    if map::needs_building(&want.folder, &want.source) { MapStatus::Queued } else { MapStatus::Ready }
+    let needs = map::needs_building(&want.folder, &want.source);
+    if !needs {
+        MapStatus::Ready
+    } else if is_active || auto_build_all {
+        MapStatus::Queued
+    } else {
+        MapStatus::Unknown
+    }
 }
 
 /// Every profile's map's state, for the companion.
@@ -770,7 +793,7 @@ fn profile_maps(wants: &[Want], states: &[MapStatus]) -> Vec<ProfileMap> {
 fn carry_out(
     wants: &[Want],
     maps: &Path,
-    fast: bool,
+    map_settings: &crate::settings::MapSettings,
     builder: Option<&Path>,
     failed: &mut Failures,
     again: &mut HashSet<PathBuf>,
@@ -790,7 +813,11 @@ fn carry_out(
         };
         MapUpdate { folder, built, status: states[0].clone(), profiles: profile_maps(wants, states) }
     };
-    let mut states: Vec<MapStatus> = wants.iter().map(|want| state_of(want, failed, again)).collect();
+    let mut states: Vec<MapStatus> = wants
+        .iter()
+        .enumerate()
+        .map(|(i, want)| state_of(want, i == 0, map_settings.auto_build_all, failed, again))
+        .collect();
     let Some(next) = states.iter().position(|state| *state == MapStatus::Queued) else {
         return (update(&states), false);
     };
@@ -806,6 +833,7 @@ fn carry_out(
     let mut during = states.clone();
     let mut last_told = -1.0f32;
     let mut last_stage = None;
+    let fast = map_settings.fast;
     // What's built, how big it is and the memory it takes as it goes, in the log: a build that takes too long
     // or too much says where.
     let folder = want.folder.file_name().map(|name| name.to_string_lossy().into_owned()).unwrap_or_default();
@@ -1164,17 +1192,19 @@ mod tests {
         let mut want = a_want(&["p/a"], "maps-that-are-not-here/europe-1", true);
         let mut failed = Failures::new();
         let none = HashSet::new();
-        assert_eq!(state_of(&want, &failed, &none), MapStatus::Queued);
+        assert_eq!(state_of(&want, true, false, &failed, &none), MapStatus::Queued);
         failed.insert(want.folder.clone(), (want.source.clone(), "sector version 903".into()));
-        assert_eq!(state_of(&want, &failed, &none), MapStatus::Failed { error: "sector version 903".into() });
+        assert_eq!(state_of(&want, true, false, &failed, &none), MapStatus::Failed { error: "sector version 903".into() });
         // The player asks for it again: built again, the failure aside.
-        assert_eq!(state_of(&want, &failed, &HashSet::from([want.folder.clone()])), MapStatus::Queued);
+        assert_eq!(state_of(&want, true, false, &failed, &HashSet::from([want.folder.clone()])), MapStatus::Queued);
         // A mod updated: built again.
         want.source = serde_json::json!({ "mods": ["updated"] });
-        assert_eq!(state_of(&want, &failed, &none), MapStatus::Queued);
+        assert_eq!(state_of(&want, true, false, &failed, &none), MapStatus::Queued);
+        // Inactive profile with auto_build_all = false: Unknown (not queued automatically)
+        assert_eq!(state_of(&want, false, false, &failed, &none), MapStatus::Unknown);
         // HVT's: never, even asked for again.
         let hvt = a_want(&["p/h"], "maps/hvtmap-1", false);
-        assert_eq!(state_of(&hvt, &failed, &HashSet::from([hvt.folder.clone()])), MapStatus::NotAllowed);
+        assert_eq!(state_of(&hvt, true, false, &failed, &HashSet::from([hvt.folder.clone()])), MapStatus::NotAllowed);
     }
 
     #[test]
