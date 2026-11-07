@@ -1,4 +1,4 @@
-﻿; WestPlay's own steps in Tauri's installer (`bundle.windows.nsis.installerHooks`, tauri.release.conf.json).
+; WestPlay's own steps in Tauri's installer (`bundle.windows.nsis.installerHooks`, tauri.release.conf.json).
 ; Included before the installer's languages, so its words are picked by $LANGUAGE as it runs.
 
 !include LogicLib.nsh
@@ -159,6 +159,8 @@ FunctionEnd
 ; start at all. Setup then says so, offers Microsoft's page, and stops (owner 2026-10-24: "so it does not
 ; continue to install"). Silent, it stops without asking.
 !macro NSIS_HOOK_PREINSTALL
+  ; Close running WestPlay processes so files can be updated in-place as an update without locked file errors
+  nsExec::Exec 'taskkill /F /IM westplay.exe /IM westplay-maps.exe'
   Call WestPlayFindWebView2
   ${If} $WestPlayWebView2 == ""
     Call WestPlayWebView2Message

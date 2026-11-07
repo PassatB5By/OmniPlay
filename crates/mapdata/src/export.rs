@@ -304,7 +304,21 @@ pub fn export(
         }
         // The whole map: as far as its roads reach. (No margin: empty ground all round it would join every
         // gap at the map's edges into one region with the sea.)
-        None => (road_extent(&map).ok_or_else(|| ExportError::Empty(options.map.clone()))?, WHOLE_MAP_SEA_CELL),
+        None => {
+            let extent = road_extent(&map).ok_or_else(|| ExportError::Empty(options.map.clone()))?;
+            let [x0, z0, x1, z1] = extent.0;
+            let width = (x1 - x0).abs() as f64;
+            let height = (z1 - z0).abs() as f64;
+            // Cap cells to ~180M so memory stays within safe limits (<1-2 GB total) even on global mega mod combos
+            const TARGET_MAX_CELLS: f64 = 180_000_000.0;
+            let area = width * height;
+            let dynamic_cell = if area / (WHOLE_MAP_SEA_CELL as f64 * WHOLE_MAP_SEA_CELL as f64) > TARGET_MAX_CELLS {
+                ((area / TARGET_MAX_CELLS).sqrt() as f32).max(WHOLE_MAP_SEA_CELL)
+            } else {
+                WHOLE_MAP_SEA_CELL
+            };
+            (extent, dynamic_cell)
+        }
     };
     let [x0, z0, x1, z1] = bounds.0;
     let sea_cells = ((x1 - x0) / cell).ceil().max(0.0) as u64 * ((z1 - z0) / cell).ceil().max(0.0) as u64;
