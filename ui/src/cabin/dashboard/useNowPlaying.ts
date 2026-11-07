@@ -4,6 +4,10 @@ import { playOrPause, useSpotifySource } from '../apps/spotify/spotify'
 import { playOrPause as playOrPauseAppleMusic, useAppleMusicSource } from '../apps/music/appleMusic'
 import { playOrPause as playOrPauseYouTubeMusic, useYouTubeMusicSource } from '../apps/youtubeMusic/youtubeMusic'
 import { playOrPause as playOrPausePlayer, usePlayerSource } from '../apps/player/player'
+import { playOrPause as playOrPauseSoundCloud, useSoundCloudSource } from '../apps/soundcloud/soundcloud'
+import { playOrPause as playOrPauseKionMusic, useKionMusicSource } from '../apps/kionMusic/kionMusic'
+import { playOrPause as playOrPauseYandexMusic, useYandexMusicSource } from '../apps/yandexMusic/yandexMusic'
+import { playOrPause as playOrPauseVkMusic, useVkMusicSource } from '../apps/vkMusic/vkMusic'
 import { type NowPlayingSource, shownSource } from './nowPlaying'
 
 /** What Now Playing last showed playing, kept while the screens showing it come and go (nowPlaying.ts). */
@@ -16,6 +20,10 @@ export function useNowPlaying() {
   const appleMusic = useAppleMusicSource()
   const youtubeMusic = useYouTubeMusicSource()
   const player = usePlayerSource()
+  const soundcloud = useSoundCloudSource()
+  const kionMusic = useKionMusicSource()
+  const yandexMusic = useYandexMusicSource()
+  const vkMusic = useVkMusicSource()
   const video = useYouTube((store) => store.current)
   const videoPlaying = useYouTube((store) => store.state?.state === 1 && store.state.video === store.current?.video)
   const playing = {
@@ -24,6 +32,10 @@ export function useNowPlaying() {
     appleMusic: appleMusic?.source.status === 'playing',
     youtubeMusic: youtubeMusic?.source.status === 'playing',
     player: player?.source.status === 'playing',
+    soundcloud: soundcloud?.source.status === 'playing',
+    kionMusic: kionMusic?.source.status === 'playing',
+    yandexMusic: yandexMusic?.source.status === 'playing',
+    vkMusic: vkMusic?.source.status === 'playing',
   }
   const has = {
     video: video !== null,
@@ -31,13 +43,29 @@ export function useNowPlaying() {
     appleMusic: Boolean(appleMusic),
     youtubeMusic: Boolean(youtubeMusic),
     player: Boolean(player),
+    soundcloud: Boolean(soundcloud),
+    kionMusic: Boolean(kionMusic),
+    yandexMusic: Boolean(yandexMusic),
+    vkMusic: Boolean(vkMusic),
   }
   const showing = shownSource(playing, has, lastPlayed)
   const showingPlays = showing !== null && playing[showing]
   useEffect(() => {
     if (showing !== null && showingPlays) lastPlayed = showing
   }, [showing, showingPlays])
-  return { showing, playing, spotify, appleMusic, youtubeMusic, player, video }
+  return {
+    showing,
+    playing,
+    spotify,
+    appleMusic,
+    youtubeMusic,
+    player,
+    soundcloud,
+    kionMusic,
+    yandexMusic,
+    vkMusic,
+    video,
+  }
 }
 
 /** The track Now Playing shows, as one line of a list draws it (the Equalizer's): its title, who it's by, its
@@ -49,7 +77,19 @@ export function useNowPlayingTrack(): {
   playing: boolean
   playPause: (() => void) | null
 } | null {
-  const { showing, playing, spotify, appleMusic, youtubeMusic, player, video } = useNowPlaying()
+  const {
+    showing,
+    playing,
+    spotify,
+    appleMusic,
+    youtubeMusic,
+    player,
+    soundcloud,
+    kionMusic,
+    yandexMusic,
+    vkMusic,
+    video,
+  } = useNowPlaying()
   const music = (
     player: { source: { title: string; artist: string; controls: { playPause: boolean } }; artwork: string | null },
     playPause: () => void,
@@ -80,6 +120,14 @@ export function useNowPlayingTrack(): {
       return youtubeMusic ? music(youtubeMusic, playOrPauseYouTubeMusic, playing.youtubeMusic) : null
     case 'player':
       return player ? music(player, playOrPausePlayer, playing.player) : null
+    case 'soundcloud':
+      return soundcloud ? music(soundcloud, playOrPauseSoundCloud, playing.soundcloud) : null
+    case 'kionMusic':
+      return kionMusic ? music(kionMusic, playOrPauseKionMusic, playing.kionMusic) : null
+    case 'yandexMusic':
+      return yandexMusic ? music(yandexMusic, playOrPauseYandexMusic, playing.yandexMusic) : null
+    case 'vkMusic':
+      return vkMusic ? music(vkMusic, playOrPauseVkMusic, playing.vkMusic) : null
     default:
       return null
   }

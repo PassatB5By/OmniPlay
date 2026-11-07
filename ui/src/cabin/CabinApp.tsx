@@ -7,6 +7,10 @@ import { pauseSpotifyWithGame, spotifyPlayer } from './apps/spotify/pauseWithGam
 import { pauseYouTubeWithGame, youtubePlayer } from './apps/youtube/pauseWithGame'
 import { pauseYouTubeMusicWithGame, youtubeMusicPlayer } from './apps/youtubeMusic/pauseWithGame'
 import { pausePlayerWithGame, playerAppPlayer } from './apps/player/pauseWithGame'
+import { pauseSoundCloudWithGame, soundcloudPlayer } from './apps/soundcloud/pauseWithGame'
+import { pauseKionMusicWithGame, kionMusicPlayer } from './apps/kionMusic/pauseWithGame'
+import { pauseYandexMusicWithGame, yandexMusicPlayer } from './apps/yandexMusic/pauseWithGame'
+import { pauseVkMusicWithGame, vkMusicPlayer } from './apps/vkMusic/pauseWithGame'
 import { AppScreen } from './apps/AppScreen'
 import { BootScreen } from './boot/BootScreen'
 import { Dashboard } from './dashboard/Dashboard'
@@ -31,20 +35,33 @@ import { followTimeZone } from './state/timeZone'
 const FOLLOW_POWER = isInHost() || new URLSearchParams(location.search).has('power')
 
 /** The cab's music players. */
-const PLAYERS = [youtubePlayer, spotifyPlayer, appleMusicPlayer, youtubeMusicPlayer, playerAppPlayer]
+const PLAYERS = [
+  youtubePlayer,
+  spotifyPlayer,
+  appleMusicPlayer,
+  youtubeMusicPlayer,
+  playerAppPlayer,
+  soundcloudPlayer,
+  kionMusicPlayer,
+  yandexMusicPlayer,
+  vkMusicPlayer,
+]
 
 /** The in-cabin screen: the shell around the screen for the current route, after the boot sequence. */
 export function CabinApp() {
   const route = useCabin((state) => state.navigation.route)
   const phase = useCabin((state) => state.power.phase)
   useEffect(() => connectHost(), [])
-  // YouTube, Spotify, Apple Music, YouTube Music and Player pause with the game (its menu, tabbing out) and play
-  // on after.
+  // Web players pause with the game (its menu, tabbing out) and play on after.
   useEffect(() => pauseYouTubeWithGame(), [])
   useEffect(() => pauseSpotifyWithGame(), [])
   useEffect(() => pauseAppleMusicWithGame(), [])
   useEffect(() => pauseYouTubeMusicWithGame(), [])
   useEffect(() => pausePlayerWithGame(), [])
+  useEffect(() => pauseSoundCloudWithGame(), [])
+  useEffect(() => pauseKionMusicWithGame(), [])
+  useEffect(() => pauseYandexMusicWithGame(), [])
+  useEffect(() => pauseVkMusicWithGame(), [])
   // One of them at a time: the newest to start plays on, the others pause (apps/oneAtATime.ts).
   useEffect(() => oneAtATime(PLAYERS), [])
   // The player's keybinds pressed in the game: the music's volume, or play/pause (apps/keybinds.ts).

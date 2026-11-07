@@ -250,6 +250,38 @@ export type HostMessage =
   | ({ type: 'youtubeMusicAnswer'; id: number; failed?: boolean } & Partial<YouTubeMusicAnswers>)
   /** What YouTube Music plays; `null`: nothing. */
   | { type: 'youtubeMusicPlayback'; playback: YouTubeMusicPlayback | null }
+  /** SoundCloud's web player */
+  | {
+      type: 'soundcloud'
+      signedIn: boolean | null
+      playing: boolean | null
+      signingIn: boolean
+    }
+  | { type: 'soundcloudPlayback'; playback: SoundCloudPlayback | null }
+  /** KION Music's web player */
+  | {
+      type: 'kionMusic'
+      signedIn: boolean | null
+      playing: boolean | null
+      signingIn: boolean
+    }
+  | { type: 'kionMusicPlayback'; playback: KionMusicPlayback | null }
+  /** Yandex Music's web player */
+  | {
+      type: 'yandexMusic'
+      signedIn: boolean | null
+      playing: boolean | null
+      signingIn: boolean
+    }
+  | { type: 'yandexMusicPlayback'; playback: YandexMusicPlayback | null }
+  /** VK Music's web player */
+  | {
+      type: 'vkMusic'
+      signedIn: boolean | null
+      playing: boolean | null
+      signingIn: boolean
+    }
+  | { type: 'vkMusicPlayback'; playback: VkMusicPlayback | null }
 
 /** The game's weather: the one there is and the one it's turning to (the same once it has); in game minutes,
  * how long until the game changes it next; and how wet the roads are, percent. Each of the last two `null`
@@ -336,6 +368,14 @@ export type PageMessage =
   | { type: 'youtubeMusic'; command: YouTubeMusicCommand }
   /** A command for Player's own player (`westplay_host::music_folder::Command`). */
   | { type: 'player'; command: PlayerCommand }
+  /** A command for SoundCloud (`westplay_host::soundcloud::Command`). */
+  | { type: 'soundcloud'; command: SoundCloudCommand }
+  /** A command for KION Music (`westplay_host::kion_music::Command`). */
+  | { type: 'kionMusic'; command: KionMusicCommand }
+  /** A command for Yandex Music (`westplay_host::yandex_music::Command`). */
+  | { type: 'yandexMusic'; command: YandexMusicCommand }
+  /** A command for VK Music (`westplay_host::vk_music::Command`). */
+  | { type: 'vkMusic'; command: VkMusicCommand }
 
 /** A song of the game's music folder (`westplay_host::music_folder::Song`): its file's name, and what its tags
  * say (none on a file without them): title, artist, length (seconds; 0: not known), cover (a file at
@@ -1096,3 +1136,48 @@ export function postToHost(message: PageMessage): void {
 export function hasTruck(truck: TruckInfo | null): truck is TruckInfo {
   return truck !== null && truck.brandId !== ''
 }
+
+export type MusicRepeat = 'off' | 'all' | 'one'
+
+export interface MusicTrackInfo {
+  title: string
+  artist: string
+  album?: string
+  artwork: string | null
+  duration: number
+}
+
+export interface GenericStreamPlayback {
+  track: MusicTrackInfo
+  playing: boolean
+  loading: boolean
+  position: number
+  duration: number
+  shuffle?: boolean
+  repeat?: MusicRepeat
+  volume?: number | null
+}
+
+export type GenericStreamCommand =
+  | { action: 'play' }
+  | { action: 'pause' }
+  | { action: 'next' }
+  | { action: 'previous' }
+  | { action: 'seek'; seconds: number }
+  | { action: 'volume'; percent: number }
+  | { action: 'shuffle'; on: boolean }
+  | { action: 'repeat'; mode: MusicRepeat }
+  | { action: 'show'; left: number; top: number; width: number; height: number }
+  | { action: 'hide' }
+
+export type SoundCloudPlayback = GenericStreamPlayback
+export type SoundCloudCommand = GenericStreamCommand
+
+export type KionMusicPlayback = GenericStreamPlayback
+export type KionMusicCommand = GenericStreamCommand
+
+export type YandexMusicPlayback = GenericStreamPlayback
+export type YandexMusicCommand = GenericStreamCommand
+
+export type VkMusicPlayback = GenericStreamPlayback
+export type VkMusicCommand = GenericStreamCommand

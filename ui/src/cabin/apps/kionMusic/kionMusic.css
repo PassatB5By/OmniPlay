@@ -1,0 +1,132 @@
+.kion-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #0f0a14;
+  color: #fff;
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  position: relative;
+}
+
+.kion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  background: linear-gradient(180deg, rgba(137, 47, 232, 0.2) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.kion-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #c065f5;
+}
+
+.kion-logo-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.kion-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.kion-cover-wrap {
+  width: 240px;
+  height: 240px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6), 0 0 40px rgba(137, 47, 232, 0.3);
+  margin-bottom: 1.5rem;
+  background: #1b1226;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kion-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kion-cover-placeholder {
+  font-size: 4rem;
+  color: #9a1ce2;
+}
+
+.kion-track-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kion-track-artist {
+  font-size: 1.1rem;
+  color: #aaa;
+  margin: 0 0 1.5rem 0;
+}
+
+.kion-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.kion-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.kion-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.kion-btn-primary {
+  width: 68px;
+  height: 68px;
+  background: linear-gradient(135deg, #e30611 0%, #892fe8 100%);
+  color: #fff;
+}
+
+.kion-btn-primary:hover {
+  filter: brightness(1.15);
+  transform: scale(1.08);
+}
+
+.kion-signin-notice {
+  background: rgba(137, 47, 232, 0.15);
+  border: 1px solid rgba(137, 47, 232, 0.4);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  color: #d199ff;
+}

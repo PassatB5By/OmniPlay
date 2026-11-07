@@ -34,6 +34,22 @@ import {
   receivePlayback as receiveYouTubeMusicPlayback,
   receiveState as receiveYouTubeMusicState,
 } from '../apps/youtubeMusic/youtubeMusic'
+import {
+  receiveSoundCloudPlayback,
+  receiveSoundCloudState,
+} from '../apps/soundcloud/soundcloud'
+import {
+  receiveKionMusicPlayback,
+  receiveKionMusicState,
+} from '../apps/kionMusic/kionMusic'
+import {
+  receiveYandexMusicPlayback,
+  receiveYandexMusicState,
+} from '../apps/yandexMusic/yandexMusic'
+import {
+  receiveVkMusicPlayback,
+  receiveVkMusicState,
+} from '../apps/vkMusic/vkMusic'
 import { useKeyboard } from '../keyboard/store'
 import { receiveMapFolder } from '../maps/mapData'
 import { receiveDetours, receiveFollowed, receiveRouteAnswer, receiveRoutes } from '../maps/routeChange'
@@ -614,6 +630,30 @@ function receiveHostMessage(now: () => number): (message: HostMessage) => void {
         break
       case 'youtubeMusicPlayback':
         receiveYouTubeMusicPlayback(message.playback)
+        break
+      case 'soundcloud':
+        receiveSoundCloudState(message.signedIn, message.playing, message.signingIn)
+        break
+      case 'soundcloudPlayback':
+        receiveSoundCloudPlayback(message.playback)
+        break
+      case 'kionMusic':
+        receiveKionMusicState(message.signedIn, message.playing, message.signingIn)
+        break
+      case 'kionMusicPlayback':
+        receiveKionMusicPlayback(message.playback)
+        break
+      case 'yandexMusic':
+        receiveYandexMusicState(message.signedIn, message.playing, message.signingIn)
+        break
+      case 'yandexMusicPlayback':
+        receiveYandexMusicPlayback(message.playback)
+        break
+      case 'vkMusic':
+        receiveVkMusicState(message.signedIn, message.playing, message.signingIn)
+        break
+      case 'vkMusicPlayback':
+        receiveVkMusicPlayback(message.playback)
         break
       case 'youtubeAnswer': {
         const { type: _, id, ...answer } = message

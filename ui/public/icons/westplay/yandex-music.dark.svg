@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="yaGradDark" x1="0" y1="100" x2="800" y2="900" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ffe066"/>
+      <stop offset="50%" stop-color="#ff9900"/>
+      <stop offset="100%" stop-color="#ff4520"/>
+    </linearGradient>
+    <linearGradient id="darkFace" x1="0" y1="0" x2="0" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2a2a2a"/>
+      <stop offset="50%" stop-color="#1c1c1c"/>
+      <stop offset="100%" stop-color="#121212"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="url(#darkFace)" stroke="#383838" stroke-width="4"/>
+  <g transform="translate(512, 512)">
+    <path d="M0,-240 C12,-100 100,-12 240,0 C100,12 12,100 0,240 C-12,100 -100,12 -240,0 C-100,-12 -12,-100 0,-240 Z" fill="url(#yaGradDark)"/>
+    <path d="M0,-240 C12,-100 100,-12 240,0 C100,12 12,100 0,240 C-12,100 -100,12 -240,0 C-100,-12 -12,-100 0,-240 Z" transform="rotate(45)" fill="url(#yaGradDark)" opacity="0.85"/>
+    <circle cx="0" cy="0" r="75" fill="#1c1c1c"/>
+    <polygon points="-25,-45 45,0 -25,45" fill="#ffe066"/>
+  </g>
+</svg>

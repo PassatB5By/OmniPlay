@@ -37,6 +37,10 @@ mod weather;
 mod webview;
 mod youtube;
 mod youtube_music;
+mod soundcloud;
+mod kion_music;
+mod yandex_music;
+mod vk_music;
 
 use std::path::PathBuf;
 use std::sync::Arc;
@@ -114,6 +118,14 @@ pub struct Status {
     /// window open.
     pub apple_music_signed_in: Option<bool>,
     pub apple_music_signing_in: bool,
+    pub soundcloud_signed_in: Option<bool>,
+    pub soundcloud_signing_in: bool,
+    pub kion_music_signed_in: Option<bool>,
+    pub kion_music_signing_in: bool,
+    pub yandex_music_signed_in: Option<bool>,
+    pub yandex_music_signing_in: bool,
+    pub vk_music_signed_in: Option<bool>,
+    pub vk_music_signing_in: bool,
     /// The map of the profile played: ready, being built, waiting for the game to close...
     pub map: maps::MapStatus,
     /// The map the cab shows: its folder in WestPlay's maps, and when it was built (the companion's
@@ -132,6 +144,10 @@ pub struct AccountRequests {
     pub youtube: AccountRequest,
     pub spotify: AccountRequest,
     pub apple_music: AccountRequest,
+    pub soundcloud: AccountRequest,
+    pub kion_music: AccountRequest,
+    pub yandex_music: AccountRequest,
+    pub vk_music: AccountRequest,
 }
 
 /// One service's request, the latest not carried out yet.
@@ -401,6 +417,10 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
     let mut spotify_log = play_log::PlayLog::new("spotify");
     let mut apple_music_log = play_log::PlayLog::new("apple music");
     let mut youtube_music_log = play_log::PlayLog::new("youtube music");
+    let mut soundcloud_log = play_log::PlayLog::new("soundcloud");
+    let mut kion_music_log = play_log::PlayLog::new("kion music");
+    let mut yandex_music_log = play_log::PlayLog::new("yandex music");
+    let mut vk_music_log = play_log::PlayLog::new("vk music");
     // Spotify's web player, while the page uses it, and what it last said (sent again when the page reloads):
     // signed in or not, and what plays.
     let mut spotify: Option<spotify::Spotify> = None;
@@ -420,6 +440,26 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
     let mut youtube_music_state: Option<youtube_music::State> = None;
     let (mut youtube_music_window_open, mut youtube_music_confirming) = (false, false);
     let mut youtube_music_playback: Option<String> = None;
+    // SoundCloud web player.
+    let mut soundcloud: Option<soundcloud::SoundCloud> = None;
+    let mut soundcloud_state: Option<soundcloud::State> = None;
+    let (mut soundcloud_window_open, mut soundcloud_confirming) = (false, false);
+    let mut soundcloud_playback: Option<String> = None;
+    // KION Music web player.
+    let mut kion_music: Option<kion_music::KionMusic> = None;
+    let mut kion_music_state: Option<kion_music::State> = None;
+    let (mut kion_music_window_open, mut kion_music_confirming) = (false, false);
+    let mut kion_music_playback: Option<String> = None;
+    // Yandex Music web player.
+    let mut yandex_music: Option<yandex_music::YandexMusic> = None;
+    let mut yandex_music_state: Option<yandex_music::State> = None;
+    let (mut yandex_music_window_open, mut yandex_music_confirming) = (false, false);
+    let mut yandex_music_playback: Option<String> = None;
+    // VK Music web player.
+    let mut vk_music: Option<vk_music::VkMusic> = None;
+    let mut vk_music_state: Option<vk_music::State> = None;
+    let (mut vk_music_window_open, mut vk_music_confirming) = (false, false);
+    let mut vk_music_playback: Option<String> = None;
     // Player's own player (music_folder.rs), while the page uses it, and what it last said played.
     let mut music_player: Option<music_folder::Player> = None;
     let mut music_player_playback: Option<String> = None;
@@ -516,6 +556,42 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                 AccountAction::SignIn => apple_music::Command::SignIn,
                 AccountAction::SignOut => apple_music::Command::SignOut,
                 AccountAction::Check => apple_music::Command::Start,
+            });
+        }
+        if let Some(action) = config.accounts.soundcloud.take()
+            && let Some(player) = start_soundcloud(&mut soundcloud, &stage, &config)
+        {
+            let _ = player.command(&match action {
+                AccountAction::SignIn => soundcloud::Command::SignIn,
+                AccountAction::SignOut => soundcloud::Command::SignOut,
+                AccountAction::Check => soundcloud::Command::Start,
+            });
+        }
+        if let Some(action) = config.accounts.kion_music.take()
+            && let Some(player) = start_kion_music(&mut kion_music, &stage, &config)
+        {
+            let _ = player.command(&match action {
+                AccountAction::SignIn => kion_music::Command::SignIn,
+                AccountAction::SignOut => kion_music::Command::SignOut,
+                AccountAction::Check => kion_music::Command::Start,
+            });
+        }
+        if let Some(action) = config.accounts.yandex_music.take()
+            && let Some(player) = start_yandex_music(&mut yandex_music, &stage, &config)
+        {
+            let _ = player.command(&match action {
+                AccountAction::SignIn => yandex_music::Command::SignIn,
+                AccountAction::SignOut => yandex_music::Command::SignOut,
+                AccountAction::Check => yandex_music::Command::Start,
+            });
+        }
+        if let Some(action) = config.accounts.vk_music.take()
+            && let Some(player) = start_vk_music(&mut vk_music, &stage, &config)
+        {
+            let _ = player.command(&match action {
+                AccountAction::SignIn => vk_music::Command::SignIn,
+                AccountAction::SignOut => vk_music::Command::SignOut,
+                AccountAction::Check => vk_music::Command::Start,
             });
         }
 
@@ -644,6 +720,18 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                 }
                 if let Some(apple_music) = &apple_music {
                     profiles.push((performance::Profile::AppleMusic, apple_music.view().environment()));
+                }
+                if let Some(soundcloud) = &soundcloud {
+                    profiles.push((performance::Profile::SoundCloud, soundcloud.view().environment()));
+                }
+                if let Some(kion_music) = &kion_music {
+                    profiles.push((performance::Profile::KionMusic, kion_music.view().environment()));
+                }
+                if let Some(yandex_music) = &yandex_music {
+                    profiles.push((performance::Profile::YandexMusic, yandex_music.view().environment()));
+                }
+                if let Some(vk_music) = &vk_music {
+                    profiles.push((performance::Profile::VkMusic, vk_music.view().environment()));
                 }
                 let sample = status.game_connected.then(|| performance::Sample {
                     game_frames: plugin.heartbeat.load(Ordering::Relaxed),
@@ -836,6 +924,38 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                             let _ = webview.post_json(playback);
                         }
                     }
+                    if soundcloud.is_some() {
+                        let signing_in = soundcloud_window_open || soundcloud_confirming;
+                        let message = soundcloud::state_message(soundcloud_state.as_ref(), signing_in);
+                        let _ = webview.post_json(&message);
+                        if let Some(playback) = &soundcloud_playback {
+                            let _ = webview.post_json(playback);
+                        }
+                    }
+                    if kion_music.is_some() {
+                        let signing_in = kion_music_window_open || kion_music_confirming;
+                        let message = kion_music::state_message(kion_music_state.as_ref(), signing_in);
+                        let _ = webview.post_json(&message);
+                        if let Some(playback) = &kion_music_playback {
+                            let _ = webview.post_json(playback);
+                        }
+                    }
+                    if yandex_music.is_some() {
+                        let signing_in = yandex_music_window_open || yandex_music_confirming;
+                        let message = yandex_music::state_message(yandex_music_state.as_ref(), signing_in);
+                        let _ = webview.post_json(&message);
+                        if let Some(playback) = &yandex_music_playback {
+                            let _ = webview.post_json(playback);
+                        }
+                    }
+                    if vk_music.is_some() {
+                        let signing_in = vk_music_window_open || vk_music_confirming;
+                        let message = vk_music::state_message(vk_music_state.as_ref(), signing_in);
+                        let _ = webview.post_json(&message);
+                        if let Some(playback) = &vk_music_playback {
+                            let _ = webview.post_json(playback);
+                        }
+                    }
                     if let Some(listing) = &music_listing {
                         let _ = webview.post_json(listing);
                     }
@@ -940,6 +1060,30 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                     if music_player.is_none() && matches!(command, music_folder::Command::Pause) {
                         // Nothing to pause: Player's player isn't running.
                     } else if let Some(player) = start_music_player(&mut music_player, &stage, &config, music_dir.as_deref()) {
+                        let _ = player.command(&command);
+                    }
+                }
+                Some(PageMessage::SoundCloud { command }) => {
+                    if soundcloud.is_none() && matches!(command, soundcloud::Command::Pause) {
+                    } else if let Some(player) = start_soundcloud(&mut soundcloud, &stage, &config) {
+                        let _ = player.command(&command);
+                    }
+                }
+                Some(PageMessage::KionMusic { command }) => {
+                    if kion_music.is_none() && matches!(command, kion_music::Command::Pause) {
+                    } else if let Some(player) = start_kion_music(&mut kion_music, &stage, &config) {
+                        let _ = player.command(&command);
+                    }
+                }
+                Some(PageMessage::YandexMusic { command }) => {
+                    if yandex_music.is_none() && matches!(command, yandex_music::Command::Pause) {
+                    } else if let Some(player) = start_yandex_music(&mut yandex_music, &stage, &config) {
+                        let _ = player.command(&command);
+                    }
+                }
+                Some(PageMessage::VkMusic { command }) => {
+                    if vk_music.is_none() && matches!(command, vk_music::Command::Pause) {
+                    } else if let Some(player) = start_vk_music(&mut vk_music, &stage, &config) {
                         let _ = player.command(&command);
                     }
                 }
@@ -1498,6 +1642,294 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
             }
         }
 
+        // What SoundCloud says and plays, for the page; its WebView failing closes it.
+        if let Some(player) = &soundcloud {
+            if player.failed() || players_closing {
+                if players_closing {
+                    log!("[soundcloud] closed with the game");
+                } else {
+                    log!("[soundcloud] its browser failed: closed, the page opens it again");
+                }
+                if let Some(line) = soundcloud_log.heard(None) {
+                    log!("{line}");
+                }
+                if let Some(failed) = soundcloud.take() {
+                    failed.close(&stage);
+                }
+                soundcloud_state = None;
+                soundcloud_playback = None;
+                status.soundcloud_signed_in = None;
+                status.soundcloud_signing_in = false;
+                soundcloud_confirming = false;
+                (config.on_status)(&status);
+                let _ = webview.post_json(&soundcloud::state_message(None, false));
+                let _ = webview.post_json(&soundcloud::playback_message(None));
+            } else {
+                let mut state_changed = false;
+                for report in player.take_reports() {
+                    match report {
+                        soundcloud::Report::Spectrum(bars) => {
+                            let _ = webview.post_json(&speakers::spectrum_message(&bars));
+                        }
+                        soundcloud::Report::State(state) => {
+                            if status.soundcloud_signed_in != Some(state.signed_in) {
+                                status.soundcloud_signed_in = Some(state.signed_in);
+                                (config.on_status)(&status);
+                            }
+                            soundcloud_state = Some(state);
+                            state_changed = true;
+                        }
+                        soundcloud::Report::SignInWindow(open) => {
+                            soundcloud_signing_in = open;
+                            status.soundcloud_signing_in = soundcloud_signing_in || soundcloud_confirming;
+                            (config.on_status)(&status);
+                            state_changed = true;
+                        }
+                        soundcloud::Report::Confirming(confirming) => {
+                            soundcloud_confirming = confirming;
+                            status.soundcloud_signing_in = soundcloud_signing_in || soundcloud_confirming;
+                            (config.on_status)(&status);
+                            state_changed = true;
+                        }
+                        soundcloud::Report::Playback(playback) => {
+                            let heard = playback.as_deref().map(|playback| play_log::Heard {
+                                doing: play_log::doing(playback.loading, playback.playing),
+                                track: Some(playback.track.title.as_str()),
+                                position: playback.position,
+                            });
+                            if let Some(line) = soundcloud_log.heard(heard) {
+                                log!("{line}");
+                            }
+                            let message = soundcloud::playback_message(playback.as_deref());
+                            let _ = webview.post_json(&message);
+                            soundcloud_playback = Some(message);
+                        }
+                    }
+                }
+                if state_changed {
+                    let signing_in = soundcloud_signing_in || soundcloud_confirming;
+                    let message = soundcloud::state_message(soundcloud_state.as_ref(), signing_in);
+                    let _ = webview.post_json(&message);
+                }
+            }
+        }
+
+        // What KION Music says and plays, for the page; its WebView failing closes it.
+        if let Some(player) = &kion_music {
+            if player.failed() || players_closing {
+                if players_closing {
+                    log!("[kion music] closed with the game");
+                } else {
+                    log!("[kion music] its browser failed: closed, the page opens it again");
+                }
+                if let Some(line) = kion_music_log.heard(None) {
+                    log!("{line}");
+                }
+                if let Some(failed) = kion_music.take() {
+                    failed.close(&stage);
+                }
+                kion_music_state = None;
+                kion_music_playback = None;
+                status.kion_music_signed_in = None;
+                status.kion_music_signing_in = false;
+                kion_music_confirming = false;
+                (config.on_status)(&status);
+                let _ = webview.post_json(&kion_music::state_message(None, false));
+                let _ = webview.post_json(&kion_music::playback_message(None));
+            } else {
+                let mut state_changed = false;
+                for report in player.take_reports() {
+                    match report {
+                        kion_music::Report::Spectrum(bars) => {
+                            let _ = webview.post_json(&speakers::spectrum_message(&bars));
+                        }
+                        kion_music::Report::State(state) => {
+                            if status.kion_music_signed_in != Some(state.signed_in) {
+                                status.kion_music_signed_in = Some(state.signed_in);
+                                (config.on_status)(&status);
+                            }
+                            kion_music_state = Some(state);
+                            state_changed = true;
+                        }
+                        kion_music::Report::SignInWindow(open) => {
+                            kion_music_signing_in = open;
+                            status.kion_music_signing_in = kion_music_signing_in || kion_music_confirming;
+                            (config.on_status)(&status);
+                            state_changed = true;
+                        }
+                        kion_music::Report::Confirming(confirming) => {
+                            kion_music_confirming = confirming;
+                            status.kion_music_signing_in = kion_music_signing_in || kion_music_confirming;
+                            (config.on_status)(&status);
+                            state_changed = true;
+                        }
+                        kion_music::Report::Playback(playback) => {
+                            let heard = playback.as_deref().map(|playback| play_log::Heard {
+                                doing: play_log::doing(playback.loading, playback.playing),
+                                track: Some(playback.track.title.as_str()),
+                                position: playback.position,
+                            });
+                            if let Some(line) = kion_music_log.heard(heard) {
+                                log!("{line}");
+                            }
+                            let message = kion_music::playback_message(playback.as_deref());
+                            let _ = webview.post_json(&message);
+                            kion_music_playback = Some(message);
+                        }
+                    }
+                }
+                if state_changed {
+                    let signing_in = kion_music_signing_in || kion_music_confirming;
+                    let message = kion_music::state_message(kion_music_state.as_ref(), signing_in);
+                    let _ = webview.post_json(&message);
+                }
+            }
+        }
+
+        // What Yandex Music says and plays, for the page; its WebView failing closes it.
+        if let Some(player) = &yandex_music {
+            if player.failed() || players_closing {
+                if players_closing {
+                    log!("[yandex music] closed with the game");
+                } else {
+                    log!("[yandex music] its browser failed: closed, the page opens it again");
+                }
+                if let Some(line) = yandex_music_log.heard(None) {
+                    log!("{line}");
+                }
+                if let Some(failed) = yandex_music.take() {
+                    failed.close(&stage);
+                }
+                yandex_music_state = None;
+                yandex_music_playback = None;
+                status.yandex_music_signed_in = None;
+                status.yandex_music_signing_in = false;
+                yandex_music_confirming = false;
+                (config.on_status)(&status);
+                let _ = webview.post_json(&yandex_music::state_message(None, false));
+                let _ = webview.post_json(&yandex_music::playback_message(None));
+            } else {
+                let mut state_changed = false;
+                for report in player.take_reports() {
+                    match report {
+                        yandex_music::Report::Spectrum(bars) => {
+                            let _ = webview.post_json(&speakers::spectrum_message(&bars));
+                        }
+                        yandex_music::Report::State(state) => {
+                            if status.yandex_music_signed_in != Some(state.signed_in) {
+                                status.yandex_music_signed_in = Some(state.signed_in);
+                                (config.on_status)(&status);
+                            }
+                            yandex_music_state = Some(state);
+                            state_changed = true;
+                        }
+                        yandex_music::Report::SignInWindow(open) => {
+                            yandex_music_signing_in = open;
+                            status.yandex_music_signing_in = yandex_music_signing_in || yandex_music_confirming;
+                            (config.on_status)(&status);
+                            state_changed = true;
+                        }
+                        yandex_music::Report::Confirming(confirming) => {
+                            yandex_music_confirming = confirming;
+                            status.yandex_music_signing_in = yandex_music_signing_in || yandex_music_confirming;
+                            (config.on_status)(&status);
+                            state_changed = true;
+                        }
+                        yandex_music::Report::Playback(playback) => {
+                            let heard = playback.as_deref().map(|playback| play_log::Heard {
+                                doing: play_log::doing(playback.loading, playback.playing),
+                                track: Some(playback.track.title.as_str()),
+                                position: playback.position,
+                            });
+                            if let Some(line) = yandex_music_log.heard(heard) {
+                                log!("{line}");
+                            }
+                            let message = yandex_music::playback_message(playback.as_deref());
+                            let _ = webview.post_json(&message);
+                            yandex_music_playback = Some(message);
+                        }
+                    }
+                }
+                if state_changed {
+                    let signing_in = yandex_music_signing_in || yandex_music_confirming;
+                    let message = yandex_music::state_message(yandex_music_state.as_ref(), signing_in);
+                    let _ = webview.post_json(&message);
+                }
+            }
+        }
+
+        // What VK Music says and plays, for the page; its WebView failing closes it.
+        if let Some(player) = &vk_music {
+            if player.failed() || players_closing {
+                if players_closing {
+                    log!("[vk music] closed with the game");
+                } else {
+                    log!("[vk music] its browser failed: closed, the page opens it again");
+                }
+                if let Some(line) = vk_music_log.heard(None) {
+                    log!("{line}");
+                }
+                if let Some(failed) = vk_music.take() {
+                    failed.close(&stage);
+                }
+                vk_music_state = None;
+                vk_music_playback = None;
+                status.vk_music_signed_in = None;
+                status.vk_music_signing_in = false;
+                vk_music_confirming = false;
+                (config.on_status)(&status);
+                let _ = webview.post_json(&vk_music::state_message(None, false));
+                let _ = webview.post_json(&vk_music::playback_message(None));
+            } else {
+                let mut state_changed = false;
+                for report in player.take_reports() {
+                    match report {
+                        vk_music::Report::Spectrum(bars) => {
+                            let _ = webview.post_json(&speakers::spectrum_message(&bars));
+                        }
+                        vk_music::Report::State(state) => {
+                            if status.vk_music_signed_in != Some(state.signed_in) {
+                                status.vk_music_signed_in = Some(state.signed_in);
+                                (config.on_status)(&status);
+                            }
+                            vk_music_state = Some(state);
+                            state_changed = true;
+                        }
+                        vk_music::Report::SignInWindow(open) => {
+                            vk_music_signing_in = open;
+                            status.vk_music_signing_in = vk_music_signing_in || vk_music_confirming;
+                            (config.on_status)(&status);
+                            state_changed = true;
+                        }
+                        vk_music::Report::Confirming(confirming) => {
+                            vk_music_confirming = confirming;
+                            status.vk_music_signing_in = vk_music_signing_in || vk_music_confirming;
+                            (config.on_status)(&status);
+                            state_changed = true;
+                        }
+                        vk_music::Report::Playback(playback) => {
+                            let heard = playback.as_deref().map(|playback| play_log::Heard {
+                                doing: play_log::doing(playback.loading, playback.playing),
+                                track: Some(playback.track.title.as_str()),
+                                position: playback.position,
+                            });
+                            if let Some(line) = vk_music_log.heard(heard) {
+                                log!("{line}");
+                            }
+                            let message = vk_music::playback_message(playback.as_deref());
+                            let _ = webview.post_json(&message);
+                            vk_music_playback = Some(message);
+                        }
+                    }
+                }
+                if state_changed {
+                    let signing_in = vk_music_signing_in || vk_music_confirming;
+                    let message = vk_music::state_message(vk_music_state.as_ref(), signing_in);
+                    let _ = webview.post_json(&message);
+                }
+            }
+        }
+
         // What the player typed on their own keyboard, and whether it types (the plugin decides: the truck
         // standing still, a field selected then).
         let typing_block = &bridge.bridge().typing;
@@ -1560,6 +1992,18 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                 let _ = player.cab(truck_speakers, head, outside, distance, equalizer, spectrum);
             }
             if let Some(player) = &music_player {
+                let _ = player.cab(truck_speakers, head, outside, distance, equalizer, spectrum);
+            }
+            if let Some(player) = &soundcloud {
+                let _ = player.cab(truck_speakers, head, outside, distance, equalizer, spectrum);
+            }
+            if let Some(player) = &kion_music {
+                let _ = player.cab(truck_speakers, head, outside, distance, equalizer, spectrum);
+            }
+            if let Some(player) = &yandex_music {
+                let _ = player.cab(truck_speakers, head, outside, distance, equalizer, spectrum);
+            }
+            if let Some(player) = &vk_music {
                 let _ = player.cab(truck_speakers, head, outside, distance, equalizer, spectrum);
             }
         }
@@ -2074,6 +2518,86 @@ fn start_spotify<'a>(
     spotify.as_ref()
 }
 
+/// SoundCloud's web player, started as the page first shows it (on a WebView2 profile of its own), or `None`
+/// if it couldn't start.
+fn start_soundcloud<'a>(
+    soundcloud: &'a mut Option<soundcloud::SoundCloud>,
+    stage: &Stage,
+    config: &Config,
+) -> Option<&'a soundcloud::SoundCloud> {
+    if soundcloud.is_none() {
+        let user_data = config.data_dir.join("webview2-soundcloud");
+        match soundcloud::SoundCloud::start(stage, config.width, config.height, &user_data) {
+            Ok(started) => {
+                log!("[soundcloud] opened");
+                *soundcloud = Some(started)
+            }
+            Err(e) => startup::mark(&format!("host: SoundCloud couldn't start: {e}")),
+        }
+    }
+    soundcloud.as_ref()
+}
+
+/// KION Music's web player, started as the page first shows it (on a WebView2 profile of its own), or `None`
+/// if it couldn't start.
+fn start_kion_music<'a>(
+    kion_music: &'a mut Option<kion_music::KionMusic>,
+    stage: &Stage,
+    config: &Config,
+) -> Option<&'a kion_music::KionMusic> {
+    if kion_music.is_none() {
+        let user_data = config.data_dir.join("webview2-kion-music");
+        match kion_music::KionMusic::start(stage, config.width, config.height, &user_data) {
+            Ok(started) => {
+                log!("[kion music] opened");
+                *kion_music = Some(started)
+            }
+            Err(e) => startup::mark(&format!("host: KION Music couldn't start: {e}")),
+        }
+    }
+    kion_music.as_ref()
+}
+
+/// Yandex Music's web player, started as the page first shows it (on a WebView2 profile of its own), or `None`
+/// if it couldn't start.
+fn start_yandex_music<'a>(
+    yandex_music: &'a mut Option<yandex_music::YandexMusic>,
+    stage: &Stage,
+    config: &Config,
+) -> Option<&'a yandex_music::YandexMusic> {
+    if yandex_music.is_none() {
+        let user_data = config.data_dir.join("webview2-yandex-music");
+        match yandex_music::YandexMusic::start(stage, config.width, config.height, &user_data) {
+            Ok(started) => {
+                log!("[yandex music] opened");
+                *yandex_music = Some(started)
+            }
+            Err(e) => startup::mark(&format!("host: Yandex Music couldn't start: {e}")),
+        }
+    }
+    yandex_music.as_ref()
+}
+
+/// VK Music's web player, started as the page first shows it (on a WebView2 profile of its own), or `None`
+/// if it couldn't start.
+fn start_vk_music<'a>(
+    vk_music: &'a mut Option<vk_music::VkMusic>,
+    stage: &Stage,
+    config: &Config,
+) -> Option<&'a vk_music::VkMusic> {
+    if vk_music.is_none() {
+        let user_data = config.data_dir.join("webview2-vk-music");
+        match vk_music::VkMusic::start(stage, config.width, config.height, &user_data) {
+            Ok(started) => {
+                log!("[vk music] opened");
+                *vk_music = Some(started)
+            }
+            Err(e) => startup::mark(&format!("host: VK Music couldn't start: {e}")),
+        }
+    }
+    vk_music.as_ref()
+}
+
 fn build_pipeline(
     config: &Config,
     stage: &Stage,
@@ -2172,6 +2696,14 @@ enum PageMessage {
     YoutubeMusic { command: youtube_music::Command },
     /// A command for Player's own player (`player`): what to play from the music folder, its controls.
     Player { command: music_folder::Command },
+    #[serde(rename = "soundcloud")]
+    SoundCloud { command: soundcloud::Command },
+    #[serde(rename = "kionMusic")]
+    KionMusic { command: kion_music::Command },
+    #[serde(rename = "yandexMusic")]
+    YandexMusic { command: yandex_music::Command },
+    #[serde(rename = "vkMusic")]
+    VkMusic { command: vk_music::Command },
     /// The text field selected on the page, a number that changes with every selection (0: none), for the
     /// player's own keyboard to type into (`typing`).
     Typing { selection: u32 },

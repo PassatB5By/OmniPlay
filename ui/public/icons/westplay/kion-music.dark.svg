@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="kionGradDark" x1="0" y1="200" x2="800" y2="800" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ff1a2b"/>
+      <stop offset="50%" stop-color="#b03eff"/>
+      <stop offset="100%" stop-color="#7e26ff"/>
+    </linearGradient>
+    <linearGradient id="darkFace" x1="0" y1="0" x2="0" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2a2a2a"/>
+      <stop offset="50%" stop-color="#1c1c1c"/>
+      <stop offset="100%" stop-color="#121212"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="url(#darkFace)" stroke="#383838" stroke-width="4"/>
+  <g transform="translate(240, 240)">
+    <path d="M60,40 L160,40 C175,40 185,50 185,65 L185,475 C185,490 175,500 160,500 L60,500 C45,500 35,490 35,475 L35,65 C35,50 45,40 60,40 Z" fill="url(#kionGradDark)"/>
+    <path d="M190,300 L380,100 C395,85 420,85 435,100 L490,155 C505,170 505,195 490,210 L330,370 L495,535 C510,550 510,575 495,590 L440,645 C425,660 400,660 385,645 L190,450 Z" fill="url(#kionGradDark)"/>
+    <circle cx="440" cy="180" r="45" fill="#ffffff" opacity="0.3"/>
+  </g>
+</svg>

@@ -98,6 +98,42 @@ pub const APPLE_MUSIC: Site = Site {
     not_yet: None,
     page_says: Some(include_str!("apple_music_sign_in.js")),
 };
+
+/// SoundCloud's sign-in, coming back to its web player.
+pub const SOUNDCLOUD: Site = Site {
+    sign_in: "https://soundcloud.com/signin",
+    title: "Sign in to SoundCloud - OmniPlay",
+    home: "https://soundcloud.com/",
+    not_yet: None,
+    page_says: None,
+};
+
+/// KION Music (MTS Music) sign-in.
+pub const KION_MUSIC: Site = Site {
+    sign_in: "https://login.mts.ru/",
+    title: "Sign in to KION Music - OmniPlay",
+    home: "https://music.mts.ru/",
+    not_yet: None,
+    page_says: None,
+};
+
+/// Yandex Music's sign-in.
+pub const YANDEX_MUSIC: Site = Site {
+    sign_in: "https://passport.yandex.ru/auth?retpath=https%3A%2F%2Fmusic.yandex.ru%2F",
+    title: "Sign in to Yandex Music - OmniPlay",
+    home: "https://music.yandex.ru/",
+    not_yet: None,
+    page_says: None,
+};
+
+/// VK Music's sign-in.
+pub const VK_MUSIC: Site = Site {
+    sign_in: "https://id.vk.com/auth?continue=https%3A%2F%2Fvk.com%2Faudio",
+    title: "Sign in to VK Music - OmniPlay",
+    home: "https://vk.com/audio",
+    not_yet: None,
+    page_says: None,
+};
 const CLASS: windows::core::PCWSTR = w!("WestPlaySignIn");
 const SIZE: (i32, i32) = (520, 760);
 /// Windows' message for the mouse leaving a window that asked to be told (its value, from WinUser.h).

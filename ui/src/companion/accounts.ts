@@ -1,5 +1,14 @@
 import { useEffect, useState } from 'react'
-import { type HostStatus, appleMusicCheck, spotifyCheck, youtubeCheck } from './useHostStatus'
+import {
+  type HostStatus,
+  appleMusicCheck,
+  kionMusicCheck,
+  soundcloudCheck,
+  spotifyCheck,
+  vkMusicCheck,
+  yandexMusicCheck,
+  youtubeCheck,
+} from './useHostStatus'
 
 /**
  * Whether each service is signed in, as the companion last knew: shown at once when it opens, kept up to date
@@ -11,11 +20,23 @@ export interface SignedIn {
   youtube: boolean | null
   spotify: boolean | null
   appleMusic: boolean | null
+  soundcloud: boolean | null
+  kionMusic: boolean | null
+  yandexMusic: boolean | null
+  vkMusic: boolean | null
 }
 
 export type Service = keyof SignedIn
 
-const SERVICES: Service[] = ['youtube', 'spotify', 'appleMusic']
+const SERVICES: Service[] = [
+  'youtube',
+  'spotify',
+  'appleMusic',
+  'soundcloud',
+  'kionMusic',
+  'yandexMusic',
+  'vkMusic',
+]
 
 const KEY = 'westplay.companion.signedIn'
 
@@ -27,7 +48,15 @@ function kept(): SignedIn {
     // Nothing kept: each is asked.
   }
   const known = (service: Service) => (typeof value?.[service] === 'boolean' ? (value[service] as boolean) : null)
-  return { youtube: known('youtube'), spotify: known('spotify'), appleMusic: known('appleMusic') }
+  return {
+    youtube: known('youtube'),
+    spotify: known('spotify'),
+    appleMusic: known('appleMusic'),
+    soundcloud: known('soundcloud'),
+    kionMusic: known('kionMusic'),
+    yandexMusic: known('yandexMusic'),
+    vkMusic: known('vkMusic'),
+  }
 }
 
 function keep(value: SignedIn) {
@@ -45,6 +74,10 @@ export function useSignedIn(status: HostStatus | null): SignedIn {
     youtube: status?.youtubeSignedIn ?? null,
     spotify: status?.spotifySignedIn ?? null,
     appleMusic: status?.appleMusicSignedIn ?? null,
+    soundcloud: status?.soundcloudSignedIn ?? null,
+    kionMusic: status?.kionMusicSignedIn ?? null,
+    yandexMusic: status?.yandexMusicSignedIn ?? null,
+    vkMusic: status?.vkMusicSignedIn ?? null,
   }
   useEffect(() => {
     if (SERVICES.every((service) => now[service] === null)) return
@@ -53,14 +86,30 @@ export function useSignedIn(status: HostStatus | null): SignedIn {
       youtube: now.youtube ?? before.youtube,
       spotify: now.spotify ?? before.spotify,
       appleMusic: now.appleMusic ?? before.appleMusic,
+      soundcloud: now.soundcloud ?? before.soundcloud,
+      kionMusic: now.kionMusic ?? before.kionMusic,
+      yandexMusic: now.yandexMusic ?? before.yandexMusic,
+      vkMusic: now.vkMusic ?? before.vkMusic,
     })
-    // Keyed by the three answers (`now` itself is new at every render).
+    // Keyed by the answers (`now` itself is new at every render).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [now.youtube, now.spotify, now.appleMusic])
+  }, [
+    now.youtube,
+    now.spotify,
+    now.appleMusic,
+    now.soundcloud,
+    now.kionMusic,
+    now.yandexMusic,
+    now.vkMusic,
+  ])
   return {
     youtube: now.youtube ?? known.youtube,
     spotify: now.spotify ?? known.spotify,
     appleMusic: now.appleMusic ?? known.appleMusic,
+    soundcloud: now.soundcloud ?? known.soundcloud,
+    kionMusic: now.kionMusic ?? known.kionMusic,
+    yandexMusic: now.yandexMusic ?? known.yandexMusic,
+    vkMusic: now.vkMusic ?? known.vkMusic,
   }
 }
 
@@ -71,5 +120,9 @@ export function useAskOnce(): void {
     if (known.youtube === null) youtubeCheck().catch(() => {})
     if (known.spotify === null) spotifyCheck().catch(() => {})
     if (known.appleMusic === null) appleMusicCheck().catch(() => {})
+    if (known.soundcloud === null) soundcloudCheck().catch(() => {})
+    if (known.kionMusic === null) kionMusicCheck().catch(() => {})
+    if (known.yandexMusic === null) yandexMusicCheck().catch(() => {})
+    if (known.vkMusic === null) vkMusicCheck().catch(() => {})
   }, [])
 }

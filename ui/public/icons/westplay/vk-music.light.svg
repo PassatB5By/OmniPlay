@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="vkGrad" x1="0" y1="200" x2="0" y2="800" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0088ff"/>
+      <stop offset="100%" stop-color="#0055dd"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="#ffffff" stroke="#e9e9ec" stroke-width="4"/>
+  <g transform="translate(262, 240)">
+    <!-- VK rounded background emblem -->
+    <rect width="500" height="500" rx="140" fill="url(#vkGrad)"/>
+    <!-- Musical note inside -->
+    <path d="M300,140 L380,115 C395,110 410,122 410,138 L410,320 C410,300 375,290 345,300 C310,312 285,345 285,375 C285,405 310,425 345,420 C380,415 410,385 410,350 L410,210 L300,240 L300,350 C300,330 265,320 235,330 C200,342 175,375 175,405 C175,435 200,455 235,450 C270,445 300,415 300,380 Z" fill="#ffffff"/>
+  </g>
+</svg>

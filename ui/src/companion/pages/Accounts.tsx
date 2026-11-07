@@ -9,8 +9,16 @@ import {
   type HostStatus,
   appleMusicSignIn,
   appleMusicSignOut,
+  kionMusicSignIn,
+  kionMusicSignOut,
+  soundcloudSignIn,
+  soundcloudSignOut,
   spotifySignIn,
   spotifySignOut,
+  vkMusicSignIn,
+  vkMusicSignOut,
+  yandexMusicSignIn,
+  yandexMusicSignOut,
   youtubeSignIn,
   youtubeSignOut,
 } from '../useHostStatus'
@@ -57,9 +65,65 @@ const SERVICES: Record<
     signingIn: (status) => status?.appleMusicSigningIn ?? false,
     words: (words) => words.appleMusic,
   },
+  soundcloud: {
+    name: 'SoundCloud',
+    app: 'soundcloud',
+    glow: GLOW.soundcloud,
+    signIn: soundcloudSignIn,
+    signOut: soundcloudSignOut,
+    signingIn: (status) => status?.soundcloudSigningIn ?? false,
+    words: () => ({
+      finishInWindow: 'Finish signing in in the SoundCloud window',
+      signingIn: { title: 'Signing in to SoundCloud', text: 'Continue in the browser window' },
+    }),
+  },
+  kionMusic: {
+    name: 'Кион Музыка',
+    app: 'kionMusic',
+    glow: GLOW.kionMusic,
+    signIn: kionMusicSignIn,
+    signOut: kionMusicSignOut,
+    signingIn: (status) => status?.kionMusicSigningIn ?? false,
+    words: () => ({
+      finishInWindow: 'Завершите вход в окне Кион Музыки',
+      signingIn: { title: 'Вход в Кион Музыку', text: 'Продолжите в открывшемся окне' },
+    }),
+  },
+  yandexMusic: {
+    name: 'Яндекс Музыка',
+    app: 'yandexMusic',
+    glow: GLOW.yandexMusic,
+    signIn: yandexMusicSignIn,
+    signOut: yandexMusicSignOut,
+    signingIn: (status) => status?.yandexMusicSigningIn ?? false,
+    words: () => ({
+      finishInWindow: 'Завершите вход в окне Яндекс Музыки',
+      signingIn: { title: 'Вход в Яндекс Музыку', text: 'Продолжите в открывшемся окне' },
+    }),
+  },
+  vkMusic: {
+    name: 'ВК Музыка',
+    app: 'vkMusic',
+    glow: GLOW.vkMusic,
+    signIn: vkMusicSignIn,
+    signOut: vkMusicSignOut,
+    signingIn: (status) => status?.vkMusicSigningIn ?? false,
+    words: () => ({
+      finishInWindow: 'Завершите вход в окне ВК Музыки',
+      signingIn: { title: 'Вход в ВК Музыку', text: 'Продолжите в открывшемся окне' },
+    }),
+  },
 }
 
-const ORDER: Service[] = ['youtube', 'spotify', 'appleMusic']
+const ORDER: Service[] = [
+  'youtube',
+  'spotify',
+  'appleMusic',
+  'soundcloud',
+  'kionMusic',
+  'yandexMusic',
+  'vkMusic',
+]
 
 /**
  * The services WestPlay plays from, each signed in (in its own window, on the desktop) or not. WestPlay only

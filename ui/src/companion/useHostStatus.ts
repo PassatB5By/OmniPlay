@@ -35,6 +35,14 @@ export interface HostStatus {
   /** The same of Apple Music: signed in or not (`null`: not known yet), and Apple's sign-in window open. */
   appleMusicSignedIn: boolean | null
   appleMusicSigningIn: boolean
+  soundcloudSignedIn: boolean | null
+  soundcloudSigningIn: boolean
+  kionMusicSignedIn: boolean | null
+  kionMusicSigningIn: boolean
+  yandexMusicSignedIn: boolean | null
+  yandexMusicSigningIn: boolean
+  vkMusicSignedIn: boolean | null
+  vkMusicSigningIn: boolean
   /** The map of the profile played (mirrors `westplay_host::maps::MapStatus`). */
   map: MapStatus
   /** The map the cab shows: its folder in WestPlay's maps, and when it was built (seconds since 1970;
@@ -163,6 +171,66 @@ export function appLogPlace(): Promise<string | null> {
 /** Runs Apple Music's web player (hidden), so the status says whether it's signed in. */
 export function appleMusicCheck(): Promise<void> {
   return call('apple_music_check')
+}
+
+/** Opens SoundCloud's sign-in in a window on the desktop. */
+export function soundcloudSignIn(): Promise<void> {
+  return call('soundcloud_sign_in')
+}
+
+/** Signs SoundCloud out. */
+export function soundcloudSignOut(): Promise<void> {
+  return call('soundcloud_sign_out')
+}
+
+/** Runs SoundCloud (hidden), so the status says whether it's signed in. */
+export function soundcloudCheck(): Promise<void> {
+  return call('soundcloud_check')
+}
+
+/** Opens KION Music's sign-in in a window on the desktop. */
+export function kionMusicSignIn(): Promise<void> {
+  return call('kion_music_sign_in')
+}
+
+/** Signs KION Music out. */
+export function kionMusicSignOut(): Promise<void> {
+  return call('kion_music_sign_out')
+}
+
+/** Runs KION Music (hidden), so the status says whether it's signed in. */
+export function kionMusicCheck(): Promise<void> {
+  return call('kion_music_check')
+}
+
+/** Opens Yandex Music's sign-in in a window on the desktop. */
+export function yandexMusicSignIn(): Promise<void> {
+  return call('yandex_music_sign_in')
+}
+
+/** Signs Yandex Music out. */
+export function yandexMusicSignOut(): Promise<void> {
+  return call('yandex_music_sign_out')
+}
+
+/** Runs Yandex Music (hidden), so the status says whether it's signed in. */
+export function yandexMusicCheck(): Promise<void> {
+  return call('yandex_music_check')
+}
+
+/** Opens VK Music's sign-in in a window on the desktop. */
+export function vkMusicSignIn(): Promise<void> {
+  return call('vk_music_sign_in')
+}
+
+/** Signs VK Music out. */
+export function vkMusicSignOut(): Promise<void> {
+  return call('vk_music_sign_out')
+}
+
+/** Runs VK Music (hidden), so the status says whether it's signed in. */
+export function vkMusicCheck(): Promise<void> {
+  return call('vk_music_check')
 }
 
 /** Opens or closes WestPlay on the truck's screen (the status then reports it, once the cabin has). */

@@ -2,7 +2,6 @@ import type { Sky } from '../../../shared/host'
 import type { ReturnKind } from '../../keyboard/layouts'
 import type { TurnKind } from '../../maps/guidance'
 import type { DestinationKind } from '../../maps/places'
-import type { AppId } from '../apps'
 
 /**
  * The cabin's own words, in the game's languages (by the game's codes, `tr_tr`, as the companion's words):
@@ -474,7 +473,7 @@ export interface Strings {
     back: string
   }
   /** Apps. */
-  apps: Record<AppId, string>
+  apps: Record<string, string>
   /** An app not ready yet (Phone, Messages): what its window says. */
   notBuiltYet: string
   /** The Calendar app's day without events (Apple's words). */
@@ -506,9 +505,24 @@ export function languageOf(gameLanguage: string | null): Language {
   return code && STRINGS[code] ? code : FALLBACK
 }
 
+const DEFAULT_APP_NAMES: Record<string, string> = {
+  soundcloud: 'SoundCloud',
+  kionMusic: 'Кион Музыка',
+  yandexMusic: 'Яндекс Музыка',
+  vkMusic: 'ВК Музыка',
+}
+
 /** The cabin's words in `language`. */
 export function stringsFor(language: Language): Strings {
-  return STRINGS[language] ?? STRINGS[FALLBACK]
+  const base = STRINGS[language] ?? STRINGS[FALLBACK]
+  return {
+    ...base,
+    apps: new Proxy(base.apps, {
+      get(target, prop: string) {
+        return (target as any)[prop] ?? (STRINGS[FALLBACK]?.apps as any)?.[prop] ?? DEFAULT_APP_NAMES[prop] ?? prop
+      },
+    }),
+  }
 }
 
 /** The languages there are words for. */

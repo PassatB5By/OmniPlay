@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="cloudGrad" x1="0" y1="250" x2="0" y2="750" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ff7700"/>
+      <stop offset="100%" stop-color="#ff3300"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="#ffffff" stroke="#e9e9ec" stroke-width="4"/>
+  <g transform="translate(140, 260) scale(1.05)" fill="url(#cloudGrad)">
+    <!-- Vertical waveform bars -->
+    <rect x="30" y="220" width="22" height="160" rx="11"/>
+    <rect x="75" y="180" width="22" height="200" rx="11"/>
+    <rect x="120" y="140" width="22" height="240" rx="11"/>
+    <rect x="165" y="110" width="22" height="270" rx="11"/>
+    <rect x="210" y="90" width="22" height="290" rx="11"/>
+    <rect x="255" y="80" width="22" height="300" rx="11"/>
+    <rect x="300" y="85" width="22" height="295" rx="11"/>
+    <!-- Cloud contour body -->
+    <path d="M345,95 C360,95 385,80 430,70 C490,56 550,100 560,150 C590,140 640,160 655,205 C685,215 710,245 710,290 C710,340 670,380 620,380 L345,380 Z"/>
+  </g>
+</svg>

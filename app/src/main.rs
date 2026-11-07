@@ -127,6 +127,78 @@ fn apple_music_check(accounts: State<Accounts>) {
     accounts.0.apple_music.request(AccountAction::Check);
 }
 
+/// Opens SoundCloud's sign-in in a window on the desktop (the status then says when it's done).
+#[tauri::command]
+fn soundcloud_sign_in(accounts: State<Accounts>) {
+    accounts.0.soundcloud.request(AccountAction::SignIn);
+}
+
+/// Signs SoundCloud out.
+#[tauri::command]
+fn soundcloud_sign_out(accounts: State<Accounts>) {
+    accounts.0.soundcloud.request(AccountAction::SignOut);
+}
+
+/// Runs SoundCloud (hidden), so the status says whether it's signed in.
+#[tauri::command]
+fn soundcloud_check(accounts: State<Accounts>) {
+    accounts.0.soundcloud.request(AccountAction::Check);
+}
+
+/// Opens KION Music's sign-in in a window on the desktop (the status then says when it's done).
+#[tauri::command]
+fn kion_music_sign_in(accounts: State<Accounts>) {
+    accounts.0.kion_music.request(AccountAction::SignIn);
+}
+
+/// Signs KION Music out.
+#[tauri::command]
+fn kion_music_sign_out(accounts: State<Accounts>) {
+    accounts.0.kion_music.request(AccountAction::SignOut);
+}
+
+/// Runs KION Music (hidden), so the status says whether it's signed in.
+#[tauri::command]
+fn kion_music_check(accounts: State<Accounts>) {
+    accounts.0.kion_music.request(AccountAction::Check);
+}
+
+/// Opens Yandex Music's sign-in in a window on the desktop (the status then says when it's done).
+#[tauri::command]
+fn yandex_music_sign_in(accounts: State<Accounts>) {
+    accounts.0.yandex_music.request(AccountAction::SignIn);
+}
+
+/// Signs Yandex Music out.
+#[tauri::command]
+fn yandex_music_sign_out(accounts: State<Accounts>) {
+    accounts.0.yandex_music.request(AccountAction::SignOut);
+}
+
+/// Runs Yandex Music (hidden), so the status says whether it's signed in.
+#[tauri::command]
+fn yandex_music_check(accounts: State<Accounts>) {
+    accounts.0.yandex_music.request(AccountAction::Check);
+}
+
+/// Opens VK Music's sign-in in a window on the desktop (the status then says when it's done).
+#[tauri::command]
+fn vk_music_sign_in(accounts: State<Accounts>) {
+    accounts.0.vk_music.request(AccountAction::SignIn);
+}
+
+/// Signs VK Music out.
+#[tauri::command]
+fn vk_music_sign_out(accounts: State<Accounts>) {
+    accounts.0.vk_music.request(AccountAction::SignOut);
+}
+
+/// Runs VK Music (hidden), so the status says whether it's signed in.
+#[tauri::command]
+fn vk_music_check(accounts: State<Accounts>) {
+    accounts.0.vk_music.request(AccountAction::Check);
+}
+
 /// The maker's Kreosus page, where players support WestPlay's development.
 const SUPPORT_PAGE: &str = "https://kreosus.com/enes-less";
 
@@ -223,6 +295,18 @@ fn main() {
             apple_music_sign_in,
             apple_music_sign_out,
             apple_music_check,
+            soundcloud_sign_in,
+            soundcloud_sign_out,
+            soundcloud_check,
+            kion_music_sign_in,
+            kion_music_sign_out,
+            kion_music_check,
+            yandex_music_sign_in,
+            yandex_music_sign_out,
+            yandex_music_check,
+            vk_music_sign_in,
+            vk_music_sign_out,
+            vk_music_check,
             open_support_page,
             open_social,
             app_log_place,

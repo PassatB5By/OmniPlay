@@ -8,6 +8,10 @@ import { useLanguage, useText } from '../state/text'
 import { isCopied, noteOpened, openedBefore, saveCopy, savedCopy } from './launchCopies'
 import { MusicApp } from './music/MusicApp'
 import { PlayerApp } from './player/PlayerApp'
+import { SoundCloudApp } from './soundcloud/SoundCloudApp'
+import { KionMusicApp } from './kionMusic/KionMusicApp'
+import { YandexMusicApp } from './yandexMusic/YandexMusicApp'
+import { VkMusicApp } from './vkMusic/VkMusicApp'
 import { SettingsApp } from './settings/SettingsApp'
 import { SpotifyApp } from './spotify/SpotifyApp'
 import { YouTubeMusicApp } from './youtubeMusic/YouTubeMusicApp'
@@ -93,6 +97,14 @@ function AppContent({ app }: { app: AppId }) {
       return <CalendarApp />
     case 'player':
       return <PlayerApp />
+    case 'soundcloud':
+      return <SoundCloudApp />
+    case 'kionMusic':
+      return <KionMusicApp />
+    case 'yandexMusic':
+      return <YandexMusicApp />
+    case 'vkMusic':
+      return <VkMusicApp />
     default:
       return <NotBuiltYet app={app} />
   }

@@ -1,0 +1,132 @@
+.vk-app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: #0d131a;
+  color: #fff;
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+  position: relative;
+}
+
+.vk-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  background: linear-gradient(180deg, rgba(0, 119, 255, 0.15) 0%, transparent 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.vk-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #3b9cff;
+}
+
+.vk-logo-icon {
+  width: 36px;
+  height: 36px;
+}
+
+.vk-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+}
+
+.vk-cover-wrap {
+  width: 240px;
+  height: 240px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 119, 255, 0.25);
+  margin-bottom: 1.5rem;
+  background: #141e29;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vk-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vk-cover-placeholder {
+  font-size: 4rem;
+  color: #0077ff;
+}
+
+.vk-track-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.vk-track-artist {
+  font-size: 1.1rem;
+  color: #8da2b5;
+  margin: 0 0 1.5rem 0;
+}
+
+.vk-controls {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.vk-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  transition: transform 0.1s, background 0.2s;
+}
+
+.vk-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.vk-btn-primary {
+  width: 68px;
+  height: 68px;
+  background: #0077ff;
+  color: #fff;
+}
+
+.vk-btn-primary:hover {
+  background: #1a8cff;
+  transform: scale(1.08);
+}
+
+.vk-signin-notice {
+  background: rgba(0, 119, 255, 0.12);
+  border: 1px solid rgba(0, 119, 255, 0.35);
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  color: #8ac0ff;
+}
