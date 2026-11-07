@@ -1680,21 +1680,17 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                             state_changed = true;
                         }
                         soundcloud::Report::SignInWindow(open) => {
-                            soundcloud_signing_in = open;
-                            status.soundcloud_signing_in = soundcloud_signing_in || soundcloud_confirming;
-                            (config.on_status)(&status);
+                            soundcloud_window_open = open;
                             state_changed = true;
                         }
                         soundcloud::Report::Confirming(confirming) => {
                             soundcloud_confirming = confirming;
-                            status.soundcloud_signing_in = soundcloud_signing_in || soundcloud_confirming;
-                            (config.on_status)(&status);
                             state_changed = true;
                         }
                         soundcloud::Report::Playback(playback) => {
                             let heard = playback.as_deref().map(|playback| play_log::Heard {
                                 doing: play_log::doing(playback.loading, playback.playing),
-                                track: Some(playback.track.title.as_str()),
+                                track: playback.track.as_ref().map(|track| track.title.as_str()),
                                 position: playback.position,
                             });
                             if let Some(line) = soundcloud_log.heard(heard) {
@@ -1707,7 +1703,11 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                     }
                 }
                 if state_changed {
-                    let signing_in = soundcloud_signing_in || soundcloud_confirming;
+                    let signing_in = soundcloud_window_open || soundcloud_confirming;
+                    if status.soundcloud_signing_in != signing_in {
+                        status.soundcloud_signing_in = signing_in;
+                        (config.on_status)(&status);
+                    }
                     let message = soundcloud::state_message(soundcloud_state.as_ref(), signing_in);
                     let _ = webview.post_json(&message);
                 }
@@ -1752,21 +1752,17 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                             state_changed = true;
                         }
                         kion_music::Report::SignInWindow(open) => {
-                            kion_music_signing_in = open;
-                            status.kion_music_signing_in = kion_music_signing_in || kion_music_confirming;
-                            (config.on_status)(&status);
+                            kion_music_window_open = open;
                             state_changed = true;
                         }
                         kion_music::Report::Confirming(confirming) => {
                             kion_music_confirming = confirming;
-                            status.kion_music_signing_in = kion_music_signing_in || kion_music_confirming;
-                            (config.on_status)(&status);
                             state_changed = true;
                         }
                         kion_music::Report::Playback(playback) => {
                             let heard = playback.as_deref().map(|playback| play_log::Heard {
                                 doing: play_log::doing(playback.loading, playback.playing),
-                                track: Some(playback.track.title.as_str()),
+                                track: playback.track.as_ref().map(|track| track.title.as_str()),
                                 position: playback.position,
                             });
                             if let Some(line) = kion_music_log.heard(heard) {
@@ -1779,7 +1775,11 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                     }
                 }
                 if state_changed {
-                    let signing_in = kion_music_signing_in || kion_music_confirming;
+                    let signing_in = kion_music_window_open || kion_music_confirming;
+                    if status.kion_music_signing_in != signing_in {
+                        status.kion_music_signing_in = signing_in;
+                        (config.on_status)(&status);
+                    }
                     let message = kion_music::state_message(kion_music_state.as_ref(), signing_in);
                     let _ = webview.post_json(&message);
                 }
@@ -1824,21 +1824,17 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                             state_changed = true;
                         }
                         yandex_music::Report::SignInWindow(open) => {
-                            yandex_music_signing_in = open;
-                            status.yandex_music_signing_in = yandex_music_signing_in || yandex_music_confirming;
-                            (config.on_status)(&status);
+                            yandex_music_window_open = open;
                             state_changed = true;
                         }
                         yandex_music::Report::Confirming(confirming) => {
                             yandex_music_confirming = confirming;
-                            status.yandex_music_signing_in = yandex_music_signing_in || yandex_music_confirming;
-                            (config.on_status)(&status);
                             state_changed = true;
                         }
                         yandex_music::Report::Playback(playback) => {
                             let heard = playback.as_deref().map(|playback| play_log::Heard {
                                 doing: play_log::doing(playback.loading, playback.playing),
-                                track: Some(playback.track.title.as_str()),
+                                track: playback.track.as_ref().map(|track| track.title.as_str()),
                                 position: playback.position,
                             });
                             if let Some(line) = yandex_music_log.heard(heard) {
@@ -1851,7 +1847,11 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                     }
                 }
                 if state_changed {
-                    let signing_in = yandex_music_signing_in || yandex_music_confirming;
+                    let signing_in = yandex_music_window_open || yandex_music_confirming;
+                    if status.yandex_music_signing_in != signing_in {
+                        status.yandex_music_signing_in = signing_in;
+                        (config.on_status)(&status);
+                    }
                     let message = yandex_music::state_message(yandex_music_state.as_ref(), signing_in);
                     let _ = webview.post_json(&message);
                 }
@@ -1896,21 +1896,17 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                             state_changed = true;
                         }
                         vk_music::Report::SignInWindow(open) => {
-                            vk_music_signing_in = open;
-                            status.vk_music_signing_in = vk_music_signing_in || vk_music_confirming;
-                            (config.on_status)(&status);
+                            vk_music_window_open = open;
                             state_changed = true;
                         }
                         vk_music::Report::Confirming(confirming) => {
                             vk_music_confirming = confirming;
-                            status.vk_music_signing_in = vk_music_signing_in || vk_music_confirming;
-                            (config.on_status)(&status);
                             state_changed = true;
                         }
                         vk_music::Report::Playback(playback) => {
                             let heard = playback.as_deref().map(|playback| play_log::Heard {
                                 doing: play_log::doing(playback.loading, playback.playing),
-                                track: Some(playback.track.title.as_str()),
+                                track: playback.track.as_ref().map(|track| track.title.as_str()),
                                 position: playback.position,
                             });
                             if let Some(line) = vk_music_log.heard(heard) {
@@ -1923,7 +1919,11 @@ pub fn run(mut config: Config, stop: Arc<AtomicBool>) -> Result<(), Error> {
                     }
                 }
                 if state_changed {
-                    let signing_in = vk_music_signing_in || vk_music_confirming;
+                    let signing_in = vk_music_window_open || vk_music_confirming;
+                    if status.vk_music_signing_in != signing_in {
+                        status.vk_music_signing_in = signing_in;
+                        (config.on_status)(&status);
+                    }
                     let message = vk_music::state_message(vk_music_state.as_ref(), signing_in);
                     let _ = webview.post_json(&message);
                 }

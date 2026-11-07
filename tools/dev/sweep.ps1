@@ -1,0 +1,2 @@
+# Sweep stale build artifacts
+
